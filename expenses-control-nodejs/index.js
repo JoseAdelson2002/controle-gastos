@@ -1,34 +1,18 @@
 import express from 'express';
 import admin from 'firebase-admin'
+import { authenticateToken } from './middlewares/authenticate-jwt.js';
 
-//REST API http://api.controle-gastos.com/transactions
 const app = express();
 
 admin.initializeApp({
   credential: admin.credential.cert('serviceAccountKey.json')
 });
 
-//GET       http://api.controle-gastos.com/transactions
-app.get('/transactions', async (request, response) => {
-    const jwt = request.headers.authorization;
-    if (!jwt) {
-        response.status(401).json({message: "Usuário não autorizado"});
-        return;
-    }
+app.get('/transactions', authenticateToken, (request, response) => {
 
-    let decodedIdToken;
-    try {
-        decodedIdToken = await admin.auth().verifyIdToken(jwt, true);
-    } catch (e) {
-        response.status(401).json({message: "Usuário não autorizado"});
-        return;
-    }
-    
-
-    console.log('GET transactions');
     admin.firestore()
         .collection('transactions')
-        .where('user.uid', '==', decodedIdToken.sub)
+        .where('user.uid', '==', request.user.uid)
         .orderBy('date', 'desc')
         .get()
         .then(snapshot => {
