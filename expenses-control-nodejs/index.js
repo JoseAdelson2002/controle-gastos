@@ -9,10 +9,27 @@ admin.initializeApp({
 });
 
 //GET       http://api.controle-gastos.com/transactions
-app.get('/transactions', (request, response) => {
+app.get('/transactions', async (request, response) => {
+    const jwt = request.headers.authorization;
+    if (!jwt) {
+        response.status(401).json({message: "Usuário não autorizado"});
+        return;
+    }
+
+    let decodedIdToken;
+    try {
+        decodedIdToken = await admin.auth().verifyIdToken(jwt, true);
+    } catch (e) {
+        response.status(401).json({message: "Usuário não autorizado"});
+        return;
+    }
+    
+
     console.log('GET transactions');
     admin.firestore()
         .collection('transactions')
+        .where('user.uid', '==', decodedIdToken.sub)
+        .orderBy('date', 'desc')
         .get()
         .then(snapshot => {
             const transactions = snapshot.docs.map(doc => ({
