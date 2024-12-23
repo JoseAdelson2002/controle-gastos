@@ -2,7 +2,7 @@ import admin from 'firebase-admin';
 
 export class  TransactionRepository {
 
-    findByUserId(uid) {
+    findByUserUid(uid) {
         return admin.firestore()
         .collection('transactions')
         .where('user.uid', '==', uid)
