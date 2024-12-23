@@ -1,1 +1,3 @@
 expenses-control-nodejs/serviceAccountKey.json
+expenses-control-nodejs/node_modules
+firebase-init.js
