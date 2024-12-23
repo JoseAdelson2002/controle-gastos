@@ -1,0 +1,16 @@
+body {
+    height: 100vh;
+}
+
+input {
+    border: none;
+}
+ 
+button {
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+form {
+    width: 300px;
+}
