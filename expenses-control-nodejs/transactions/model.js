@@ -1,3 +1,5 @@
+import { TransactionRepository } from "./repository.js";
+
 export class Transaction {
 
     date;
@@ -6,6 +8,12 @@ export class Transaction {
     transactionType;
     type;
     user;
+    
+    #repository;
+
+    constructor() {
+        this.#repository = new TransactionRepository();
+    }
 
     findByUser() {
         if (!this.user?.uid) {
@@ -15,17 +23,8 @@ export class Transaction {
             });
         }
 
-        return admin.firestore()
-        .collection('transactions')
-        .where('user.uid', '==', this.user.uid)
-        .orderBy('date', 'desc')
-        .get()
-        .then(snapshot => {
-            return snapshot.docs.map(doc => ({
-                ...doc.data(),
-                uid: doc.id
-            }))
-        })
+        return this.#repository.findByUserId(this.user.uid);
+
     }
 
 }
