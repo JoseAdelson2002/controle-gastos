@@ -204,6 +204,54 @@ describe("Transaction model", () => {
         })
     })
 
+    describe('given delete transaction', () => {
+
+        let repositoryMock;
+
+        beforeEach(() => {
+            repositoryMock = {
+                _hasDeleted:  false,
+                delete() {
+                    this._hasDeleted = true;
+                    return Promise.resolve();
+                },
+                findByUid () {
+                    return Promise.resolve({user: {uid: "anyUserUid"}});
+                }
+            }
+        })
+
+        test('when success, then delete transaction', async () => {
+            const model = new Transaction(repositoryMock);
+            model.user = {uid: "anyUserUid"};
+            model.uid = "anyUid";
+
+            await model.delete();
+
+            expect(repositoryMock._hasDeleted).toBeTruthy();
+        })
+
+        test('when transaction doesnt belong to user, then return eror', async() => {
+            const model = new Transaction(repositoryMock);
+            model.user = {uid: "anyOtherUserUid"};
+            model.uid = "anyUid";
+
+            await expect(model.delete())
+                .rejects.toBeInstanceOf(UserDoesntOwnTransactionError);
+        })
+
+        test('when transaction doesnt exist, then return eror', async() => {
+            const model = new Transaction({
+                findByUid: () => Promise.resolve(null)
+            });
+            model.uid = "anyUid";
+            model.user = {uid: "anyOtherUserUid"};
+
+            await expect(model.delete())
+                .rejects.toBeInstanceOf(TransactionNotFoundError);
+        })
+    })
+
     function createTransaction () {
         const transaction = new Transaction();
         transaction.uid =  1;

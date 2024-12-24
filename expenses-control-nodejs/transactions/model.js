@@ -75,7 +75,12 @@ export class Transaction {
 
             return this.#repository.update(this); 
         })
+    }
 
+    delete() {
+        return this.findByUid().then(() => {
+            return this.#repository.delete(this);
+        })
         
     }
 }
