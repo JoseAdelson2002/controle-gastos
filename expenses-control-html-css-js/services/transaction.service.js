@@ -41,33 +41,32 @@ function callApi({ method, url, params }) {
             return;
         }
 
+        const token = await currentUser.getIdToken();
+        console.log("Token gerado:", token); // Log para verificar o token gerado
+
         const xhr = new XMLHttpRequest();
 
-        // Abrindo a requisição HTTP com o método e URL
         xhr.open(method, url, true);
 
-        // Adicionando cabeçalhos de autorização e tipo de conteúdo
-        xhr.setRequestHeader('Authorization', await firebase.auth().currentUser.getIdToken());
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
         xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
 
-        // Função de callback para verificar o status da requisição
-        xhr.onreadystatechange = function() {
+        xhr.onreadystatechange = function () {
             if (this.readyState == 4) {
                 const json = JSON.parse(this.responseText);
                 if (this.status !== 200) {
-                    reject(json);  // Rejeitando a Promise em caso de erro
+                    console.error("Erro na requisição:", json); // Log do erro
+                    reject(json);
                 } else {
-                    resolve(json);  // Resolvendo a Promise com a resposta
+                    resolve(json);
                 }
-                console.log(this.responseText);
             }
         };
 
-        // Enviando a requisição com os parâmetros, se houver
         if (params) {
-            xhr.send(JSON.stringify(params)); // Para POST, PUT, PATCH, etc.
+            xhr.send(JSON.stringify(params));
         } else {
-            xhr.send(); // Para GET e DELETE, não é necessário enviar corpo
+            xhr.send();
         }
     });
 }

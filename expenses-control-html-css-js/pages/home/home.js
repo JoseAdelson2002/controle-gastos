@@ -6,10 +6,10 @@ function logout() {
     })
 }
 
-firebase.auth().onAuthStateChanged(user => {
+firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
-        user.getIdToken().then(token => console.log(token))
-        findTransactions(user);
+        const token = await user.getIdToken();
+        findTransactions(token);
     }
 })
 
@@ -17,9 +17,9 @@ function newTransaction() {
     window.location.href = "../transaction/transaction.html"
 }
 
-function findTransactions(user) {
+function findTransactions(token) {
     showLoading();
-    transactionService.findByUser(user)
+    transactionService.findByUser(token)
         .then(transactions => {
             hideLoading();
             addTransactionsToScreen(transactions);
